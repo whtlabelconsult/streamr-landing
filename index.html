@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamR - Bring Guests Into Your Broadcast</title>
+  <meta name="description" content="The simplest way to bring remote guests into your livestream or podcast. Get individual camera feeds for OBS in seconds.">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="StreamR - Bring Guests Into Your Broadcast">
+  <meta property="og:description" content="The simplest way to bring remote guests into your livestream or podcast. Get individual camera feeds for OBS in seconds.">
+  <meta property="og:image" content="/hero-image.jpg">
+  <meta property="og:type" content="website">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --void: #0a0a0f;
+      --deep: #12121a;
+      --surface: #1a1a24;
+      --elevated: #242430;
+      --border: #2a2a38;
+      --muted: #9ca3af;
+      --text: #e4e4ed;
+      --bright: #ffffff;
+      --primary: #3B82F6;
+      --primary-light: #60a5fa;
+      --secondary: #7b61ff;
+      --success: #00ff88;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--void);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Typography */
+    h1, h2, h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--bright);
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 0;
+      background: rgba(10, 10, 15, 0.6);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      transition: all 0.3s;
+    }
+
+    nav.scrolled {
+      background: rgba(10, 10, 15, 0.95);
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--bright);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bright);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(59, 130, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--bright);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-large {
+      padding: 18px 36px;
+      font-size: 1.1rem;
+    }
+
+    /* ==========================================
+       HERO SECTION - Full Width Background
+       ========================================== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Background Image */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    /* Gradient Overlay - Dark left, lighter right */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(90deg, 
+          rgba(10, 10, 15, 0.95) 0%, 
+          rgba(10, 10, 15, 0.85) 30%,
+          rgba(10, 10, 15, 0.7) 50%,
+          rgba(10, 10, 15, 0.5) 70%,
+          rgba(10, 10, 15, 0.4) 100%
+        ),
+        linear-gradient(180deg,
+          rgba(10, 10, 15, 0.3) 0%,
+          transparent 30%,
+          transparent 70%,
+          rgba(10, 10, 15, 0.8) 100%
+        );
+      z-index: 1;
+    }
+
+    /* Blue glow accent */
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      left: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Hero Content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 700px;
+      padding: 120px 24px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 100px;
+      font-size: 0.9rem;
+      color: var(--primary-light);
+      margin-bottom: 32px;
+      animation: fade-in-up 0.6s ease-out;
+    }
+
+    .hero-badge i {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 4.5rem);
+      line-height: 1.05;
+      margin-bottom: 28px;
+      animation: fade-in-up 0.6s ease-out 0.1s both;
+    }
+
+    .hero h1 span {
+      display: block;
+    }
+
+    .hero-description {
+      font-size: 1.3rem;
+      color: var(--muted);
+      margin-bottom: 48px;
+      max-width: 550px;
+      line-height: 1.7;
+      animation: fade-in-up 0.6s ease-out 0.2s both;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      animation: fade-in-up 0.6s ease-out 0.3s both;
+    }
+
+    /* Floating Stats */
+    .hero-stats {
+      position: absolute;
+      right: 10%;
+      bottom: 15%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fade-in-up 0.8s ease-out 0.5s both;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .stat-badge:nth-child(2) {
+      animation-delay: -1s;
+    }
+
+    .stat-badge:nth-child(3) {
+      animation-delay: -2s;
+    }
+
+    .stat-badge i {
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .stat-badge span {
+      font-weight: 600;
+      color: var(--bright);
+      font-size: 0.95rem;
+    }
+
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .scroll-indicator i {
+      font-size: 1.2rem;
+    }
+
+    /* Animations */
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes icon-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes icon-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    @keyframes icon-spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes icon-wiggle {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+
+    /* ==========================================
+       FEATURES SECTION
+       ========================================== */
+    .features {
+      padding: 140px 0;
+      background: var(--void);
+      position: relative;
+    }
+
+    .features::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(180deg, rgba(10, 10, 15, 0.8), transparent);
+      pointer-events: none;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-header h2 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 28px;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, var(--surface), var(--deep));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 44px 36px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
+      transform: translateY(-8px);
+    }
+
+    .feature-icon {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(123, 97, 255, 0.1));
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover .feature-icon {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(123, 97, 255, 0.2));
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+      transform: scale(1.1);
+    }
+
+    .feature-icon i {
+      font-size: 36px;
+      color: var(--primary);
+      transition: all 0.3s;
+    }
+
+    /* Individual icon animations */
+    .feature-card:nth-child(1):hover .feature-icon i { animation: icon-pulse 0.6s ease-in-out infinite; }
+    .feature-card:nth-child(2):hover .feature-icon i { animation: icon-bounce 0.5s ease-in-out infinite; }
+    .feature-card:nth-child(3):hover .feature-icon i { animation: icon-wiggle 0.4s ease-in-out infinite; }
+    .feature-card:nth-child(4):hover .feature-icon i { animation: icon-spin-slow 3s linear infinite; }
+    .feature-card:nth-child(5):hover .feature-icon i { animation: icon-pulse 0.5s ease-in-out infinite; }
+    .feature-card:nth-child(6):hover .feature-icon i { animation: icon-bounce 0.6s ease-in-out infinite; }
+
+    .feature-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    /* ==========================================
+       HOW IT WORKS
+       ========================================== */
+    .how-it-works {
+      padding: 140px 0;
+      background: var(--deep);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 50px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .step {
+      text-align: center;
+    }
+
+    .step-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      position: relative;
+      box-shadow: 0 0 50px rgba(59, 130, 246, 0.4);
+    }
+
+    .step-icon i {
+      font-size: 36px;
+      color: var(--bright);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 36px;
+      height: 36px;
+      background: var(--void);
+      border: 3px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .step h3 {
+      font-size: 1.5rem;
+      margin-bottom: 14px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================
+       CTA SECTION
+       ========================================== */
+    .cta {
+      padding: 140px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, var(--surface), var(--deep));
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 100px 60px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-icon {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 32px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .cta-icon i {
+      font-size: 40px;
+      color: var(--bright);
+    }
+
+    .cta h2 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+    }
+
+    .cta p {
+      color: var(--muted);
+      margin-bottom: 40px;
+      font-size: 1.25rem;
+    }
+
+    /* ==========================================
+       FOOTER
+       ========================================== */
+    footer {
+      padding: 50px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-brand img {
+      height: 32px;
+      width: auto;
+    }
+
+    .footer-brand span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .suite-links {
+      display: flex;
+      gap: 28px;
+    }
+
+    .suite-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suite-links a:hover {
+      color: var(--primary);
+    }
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+    @media (max-width: 1024px) {
+      .hero-stats {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero-description {
+        font-size: 1.1rem;
+      }
+
+      .hero-content {
+        padding: 100px 20px;
+        text-align: center;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .hero-overlay {
+        background: 
+          linear-gradient(180deg, 
+            rgba(10, 10, 15, 0.7) 0%, 
+            rgba(10, 10, 15, 0.85) 50%,
+            rgba(10, 10, 15, 0.95) 100%
+          );
+      }
+
+      .nav-links a:not(.btn) {
+        display: none;
+      }
+
+      .features, .how-it-works, .cta {
+        padding: 80px 0;
+      }
+
+      .section-header h2 {
+        font-size: 2rem;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-box {
+        padding: 60px 30px;
+      }
+
+      .cta h2 {
+        font-size: 2rem;
+      }
+
+      footer .container {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="container">
+      <a href="/" class="logo">
+        <img src="logo.png" alt="StreamR">
+      </a>
+      
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="https://app.usestreamr.io" class="btn btn-primary">
+          Launch App <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <!-- Background Image -->
+    <div class="hero-bg">
+      <img src="hero-image.jpg" alt="Professional podcast recording session">
+    </div>
+    
+    <!-- Overlay -->
+    <div class="hero-overlay"></div>
+    
+    <!-- Blue Glow -->
+    <div class="hero-glow"></div>
+
+    <!-- Content -->
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-bolt"></i>
+        Simple. Fast. Free to start.
+      </div>
+      
+      <h1>
+        <span>Bring guests into</span>
+        <span class="text-gradient">your broadcast</span>
+      </h1>
+      
+      <p class="hero-description">
+        The simplest way to add remote guests to your livestream or podcast. 
+        Get individual camera feeds for OBS in seconds — no downloads required.
+      </p>
+      
+      <div class="hero-buttons">
+        <a href="https://app.usestreamr.io" class="btn btn-primary btn-large">
+          <i class="fas fa-rocket"></i>
+          Launch App
+        </a>
+        <a href="#how-it-works" class="btn btn-secondary btn-large">
+          <i class="fas fa-play-circle"></i>
+          See How It Works
+        </a>
+      </div>
+    </div>
+
+    <!-- Floating Stats -->
+    <div class="hero-stats">
+      <div class="stat-badge">
+        <i class="fas fa-video"></i>
+        <span>1080p HD Video</span>
+      </div>
+      <div class="stat-badge">
+        <i class="fas fa-users"></i>
+        <span>10+ Guests</span>
+      </div>
+      <div class="stat-badge">
+        <i class="fas fa-clock"></i>
+        <span>Setup in 30 seconds</span>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Everything you need</h2>
+        <p>Built for livestreamers and podcasters who want professional remote guests without the complexity.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-th-large"></i>
+          </div>
+          <h3>Individual Camera Feeds</h3>
+          <p>Get a unique URL for each guest's camera. Add them as separate browser sources in OBS for complete layout control.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <h3>OBS Ready</h3>
+          <p>Designed for OBS Studio. Clean, transparent-ready video feeds that drop right into your scenes with zero hassle.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-door-open"></i>
+          </div>
+          <h3>Green Room</h3>
+          <p>Guests wait in a holding room until you're ready. Admit them when you want them on screen — you're in control.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-circle"></i>
+          </div>
+          <h3>Cloud Recording</h3>
+          <p>Record your sessions with one click. Downloads available after your stream ends. Never miss a moment.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-mouse-pointer"></i>
+          </div>
+          <h3>No Downloads</h3>
+          <p>Guests just click a link and join from their browser. No apps, no plugins, no friction. Just works.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-gem"></i>
+          </div>
+          <h3>HD Quality</h3>
+          <p>Up to 1080p video at 30fps. Adjustable quality settings to match your bandwidth and production needs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Go live with remote guests in three simple steps.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-plus-circle"></i>
+            <span class="step-number">1</span>
+          </div>
+          <h3>Create a Room</h3>
+          <p>Enter your name and create a guest room in seconds. No account required to get started.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-share-alt"></i>
+            <span class="step-number">2</span>
+          </div>
+          <h3>Share the Link</h3>
+          <p>Send your guest the invite link. They join from their browser with just one click.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-icon">
+            <i class="fas fa-tv"></i>
+            <span class="step-number">3</span>
+          </div>
+          <h3>Add to OBS</h3>
+          <p>Copy the OBS browser source URL and add it to your scene. That's it — you're live!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta-box">
+        <div class="cta-icon">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <h2>Ready to bring guests on stream?</h2>
+        <p>Start for free. No credit card required. Go live in minutes.</p>
+        <a href="https://app.usestreamr.io" class="btn btn-primary btn-large">
+          <i class="fas fa-broadcast-tower"></i>
+          Launch StreamR
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-brand">
+        <img src="logo.png" alt="StreamR">
+        <span>Part of the Marketr Suite</span>
+      </div>
+
+      <div class="suite-links">
+        <a href="#"><i class="fas fa-share-nodes"></i> PostR</a>
+        <a href="#"><i class="fas fa-photo-film"></i> SlidR</a>
+        <a href="#"><i class="fas fa-broadcast-tower"></i> StreamR</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .step').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'all 0.6s ease-out';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
