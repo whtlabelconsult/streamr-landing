@@ -600,6 +600,8 @@ nav .container {
 footer {
   padding: 50px 0;
   border-top: 1px solid var(--border);
+  position: relative;
+  background: var(--void);
 }
 
 footer .container {
@@ -626,12 +628,17 @@ footer .container {
   font-size: 0.9rem;
 }
 
-.suite-links {
+footer .suite-links {
   display: flex;
   gap: 28px;
+  position: static;
+  background: none;
+  border: none;
+  padding: 0;
+  backdrop-filter: none;
 }
 
-.suite-links a {
+footer .suite-links a {
   color: var(--muted);
   text-decoration: none;
   font-size: 0.95rem;
@@ -641,7 +648,7 @@ footer .container {
   gap: 8px;
 }
 
-.suite-links a:hover {
+footer .suite-links a:hover {
   color: var(--primary);
 }
 
